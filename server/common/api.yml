@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: Akcenta Lead API
+  description: Lead API is interface for service, that aggregates and wraps various CMSes across several region.
+  contact:
+    email: ondrej.holman@akcenta.cz
+  license:
+    name: Proprietary
+  version: 1.0.11
+servers:
+  - url: https://devsrv-01
+tags:
+  - name: lead
+    description: Endpoints that serve registering new lead from public website
+  - name: meta
+    description: Endpoints for serving meta information
+paths:
+  /api/v1/leads/de:
+    post:
+      tags:
+        - lead
+      summary: Register new lead into service
+      operationId: registerLead
+      requestBody:
+        description: Lead in standard structure
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadFormDE'
+        required: true
+      responses:
+        '201':
+          description: ACCEPTED - Lead registered for further processing
+        '400':
+          description: Error during processing occurred
+        '422':
+          description: Invalid entity (wrong format of email, phone, etc.)
+  /api/v1/meta/{region}:
+    get:
+      parameters:
+        - in: path
+          name: region
+          schema:
+            type: string
+          required: true
+          description: National code as specified in ISO 3166-1 alpha-2
+      tags:
+        - meta
+      summary: Get
+      operationId: getMeta
+      responses:
+        '200':
+          description: Single metadata object for input form of given region
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meta'
+
+components:
+  schemas:
+    Meta:
+      type: object
+      properties:
+        currencies:
+          type: array
+          items:
+            type: string
+            description: ISO currency code according to ISO 4217
+        forexConversions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              type:
+                type: string
+                enum:
+                  - unknown
+                  - range
+              rangeFrom:
+                type: integer
+              rangeThru:
+                type: integer
+        scopes:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              rangeFrom:
+                type: integer
+              rangeThru:
+                type: integer
+              currency:
+                type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+    LeadFormDE:
+      type: object
+      properties:
+        businessName:
+          type: string
+          example: Akcenta Digital s.r.o.
+        personName:
+          type: string
+          example: Johann Nowak
+        email:
+          type: string
+          example: johann.nowak@akcenta.digital
+        phone:
+          type: string
+          example: +496912345678
+        consent:
+          type: boolean
+          example: true
+        currencies:
+          type: array
+          description: ISO currency code according to ISO 4217
+          items:
+            type: string
